@@ -45,7 +45,7 @@ void modPowerElectronicsInit(modPowerElectricsPackStateTypedef *packState, modCo
 	modPowerElectronicsPackStateHandle->disChargeHCAllowed       = true;
 	modPowerElectronicsPackStateHandle->preChargeDesired         = false;
 	modPowerElectronicsPackStateHandle->chargeDesired            = false;
-	modPowerElectronicsPackStateHandle->chargeAllowed 					 = true;
+	modPowerElectronicsPackStateHandle->chargeAllowed            = true;
 	modPowerElectronicsPackStateHandle->safetyOverCANHCSafeNSafe = false;
 	modPowerElectronicsPackStateHandle->chargeBalanceActive      = false;
 	modPowerElectronicsPackStateHandle->chargeCurrentDetected    = false;
