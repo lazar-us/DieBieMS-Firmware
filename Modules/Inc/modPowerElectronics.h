@@ -79,7 +79,7 @@ typedef struct {
 	uint8_t  watchDogTime;
 	driverLTC6803CellsTypedef cellVoltagesIndividual[NoOfCellsPossibleOnChip];
 	modPowerElectronicsPackOperationalCellStatesTypedef packOperationalCellState;
-	
+
 	// Slave BMS
 	uint8_t  hiAmpShieldPresent;
 	float    hiCurrentLoadVoltage;
@@ -125,5 +125,26 @@ float modPowerElectronicsMapVariableFloat(float inputVariable, float inputLowerL
 void modPowerElectronicsInitISL(void);
 bool modPowerElectronicsHCSafetyCANAndPowerButtonCheck(void);
 void modPowerElectronicsResetBalanceModeActiveTimeout(void);
+
+// Temporarily set the cell voltage to end charging at. This can be used to
+// perform a partial charge to a specified voltage.
+//
+// Rather than charging fully to cellSoftOverVoltage, charging will be stopped
+// when a single cell reaches cellChargeEndVoltage. It is recommended that this
+// value exceed the configured cellBalancingStart.
+//
+// This value will be cleared when the upon entry into discharge mode. (Or when
+// the BMS next restarts.) The next charge cycle will use the configured
+// cellChargeEndVoltage or cellSoftOverVoltage.
+//
+// Returns true iff the end voltage is set, false if the value falls outside
+// the permitted range.
+bool modPowerElectronicsSetChargeEndCellVoltage(float chargeEndCellVoltage);
+
+// Clear the charge end voltage. Charging will end at the configured
+// cellChargeEndVoltage or cellSoftOverVoltage.
+void modPowerElectronicsClearChargeEndCellVoltage();
+
+float modPowerElectronicsGetEffectiveChargeEndCellVoltage();
 
 #endif

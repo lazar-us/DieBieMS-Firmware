@@ -467,8 +467,21 @@ typedef enum {
 	COMM_SET_CHUCK_DATA,
 	COMM_CUSTOM_APP_DATA,
 	COMM_NRF_START_PAIRING,
-  COMM_STORE_BMS_CONF = 50,
-  COMM_GET_BMS_CELLS
+        COMM_STORE_BMS_CONF = 50,
+        COMM_GET_BMS_CELLS = 51,
+        // Set the charge end cell voltage. May be used to configure partial
+        // charging. A one byte packet is sent in response, containing 1 on
+        // success or 0 if the voltage was rejected.
+        COMM_SET_CHARGE_END_CELL_VOLTAGE = 53,
+        // Get the effective charge end cell voltage. This may be the value
+        // previously set, the configured default charge end voltage, or the
+        // configured soft over voltage. A packet containing an auto float is
+        // sent in response.
+        COMM_GET_CHARGE_END_CELL_VOLTAGE = 52,
+        // Clear a previously set charge end voltage. The default charge end
+        // voltage will be used if one has been configured. An empty packet is
+        // sent in response.
+        COMM_CLEAR_CHARGE_END_CELL_VOLTAGE = 54,
 } COMM_PACKET_ID;
 
 typedef enum {

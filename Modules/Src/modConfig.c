@@ -42,8 +42,9 @@ void modConfigLoadDefaultConfig(modConfigGeneralConfigStructTypedef *configLocat
 	configLocation->cellHardUnderVoltage											     = 2.30f;										// Worst case X.XXV as lowest cell voltage
 	configLocation->cellHardOverVoltage												     = 4.25f;										// Worst case X.XXV as highest cell voltage
 	configLocation->cellLCSoftUnderVoltage											   = 2.90f;										// Low current lowest cell voltage X.XXV.
-  configLocation->cellHCSoftUnderVoltage                         = 3.25f;                   // High current lowest cell voltage X.XXV.
+        configLocation->cellHCSoftUnderVoltage                         = 3.25f;                   // High current lowest cell voltage X.XXV.
 	configLocation->cellSoftOverVoltage												     = 4.15f;										// Normal highest cell voltage X.XXV.
+        configLocation->cellChargeEndVoltage = 0.0f;  // Cell voltage to halt charging at; ignored if below any under voltage. Useful for default partial charging.
 	configLocation->cellBalanceDifferenceThreshold                 = 0.01f;										// Start balancing @ XmV difference, stop if below.
 	configLocation->cellBalanceStart													     = 3.80f;										// Start balancing above X.XXV.
 	configLocation->cellThrottleUpperStart										     = 0.03f;										// Upper range of cell voltage for charge throttling.
