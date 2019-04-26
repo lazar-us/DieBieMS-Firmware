@@ -25,8 +25,9 @@ typedef struct {
 	float    cellLCSoftUnderVoltage;																							// If the lowest cell is under this voltage -> disable low current load
 	float    cellHCSoftUnderVoltage;																							// If the lowest cell is under this voltage -> disable high current load
 	float    cellSoftOverVoltage;																								  // If the upper cell is above this voltage -> disable charging, but keep bms enabled
+	float    cellChargeEndVoltage;																								  // The voltage at which to end charging. Used for default partial charging. Ignored if zero.
 	float    cellBalanceDifferenceThreshold;																			// If the upper cell is more than this voltage away from the average -> start discharging this cell
-	float    cellBalanceStart;																										// If an upper cell is above this voltage and higher than the cellBalanceDifferenceThreshold voltage then average, start discharging 
+	float    cellBalanceStart;																										// If an upper cell is above this voltage and higher than the cellBalanceDifferenceThreshold voltage then average, start discharging
 	float    cellThrottleUpperStart;																							// Charge throttle range
 	float    cellThrottleLowerStart;																							// Discharge throttle rande
 	float    cellThrottleUpperMargin;																							// Margin from the upper cell voltage extremes
@@ -37,8 +38,8 @@ typedef struct {
 	uint8_t  buzzerSingalPersistant;                                              // - Stores whether the buzzer should stay on after triggering
 	float    shuntLCFactor;                                                       // Shunt multiplication factor Low current
 	int16_t  shuntLCOffset;                                                       // Shunt low current offset
-	float    shuntHCFactor;                                                       // Shunt multiplication factor High current	
-  int16_t  shuntHCOffset;                                                       // Shunt high current offset	
+	float    shuntHCFactor;                                                       // Shunt multiplication factor High current
+  int16_t  shuntHCOffset;                                                       // Shunt high current offset
 	uint8_t  throttleChargeIncreaseRate;																					// The rate of charge throttle percentage increase per 100ms
 	uint8_t  throttleDisChargeIncreaseRate;                                       // The rate of discharge throttle percentage instrease per 100ms
 	uint32_t cellBalanceUpdateInterval;																						// Amount of time that the balance resistor enable mask is kept
@@ -49,7 +50,7 @@ typedef struct {
 	float    hysteresisCharge;																										// If the highest cell voltage loweres this amount of mW re enable charge input
 	uint32_t timeoutChargeCompleted;																							// If tricklecharging > this threshold timer declare the pack charged but keep balancing if nessesary
 	uint32_t timeoutChargingCompletedMinimalMismatch;															// If charger is disabled and cellvoltagemismatch is under threshold determin charged after this timeout time
-	float    maxMismatchThreshold;                                                // If the mismatch is below this threshold the battery SoC is set to 100% 
+	float    maxMismatchThreshold;                                                // If the mismatch is below this threshold the battery SoC is set to 100%
 	float    chargerEnabledThreshold;																							// Minimal current to stay in charge mode
 	uint32_t timeoutChargerDisconnected;																					// Timeout for charger disconnect detection
 	float    minimalPrechargePercentage;																					// Output voltage threshold for precharging
@@ -92,7 +93,7 @@ typedef struct {
 	uint8_t  canBusSpeed;																													// CAN bus baudrate
 	uint8_t  chargeEnableOperationalState;                                        // State to enter when BMS is turned on due to charger
 	uint8_t  DCDCEnableInverted;                                                  // States whether or not to invert the DCDC enable signal
-	
+
 	// Slave - HiAmp Config
 	uint32_t NTCTopResistor[modConfigNoOfNTCTypes];                               // NTC Pullup resistor value
 	uint32_t NTC25DegResistance[modConfigNoOfNTCTypes];                           // NTC resistance at 25 degree

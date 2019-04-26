@@ -311,7 +311,7 @@ void modTerminalProcessString(char *str) {
 		} else if (strcmp(argv[1], "off") == 0) {
                   if (argc != 2) {
                     modCommandsPrintf("This command requires two arguments.");
-                  } else if (!modPowerElectronicsSetChargeEndCellVoltage(config->cellSoftOverVoltage)) {
+                  } else if (!modPowerElectronicsSetChargeEndCellVoltage(generalConfig->cellSoftOverVoltage)) {
                     modCommandsPrintf("Failed to disable partial charging.");
                   } else {
                     modCommandsPrintf("Partial charging disabled.");
@@ -321,8 +321,8 @@ void modTerminalProcessString(char *str) {
                     modCommandsPrintf("This command requires two arguments.");
                   } else {
                     modPowerElectronicsClearChargeEndCellVoltage();
-                    if (config->cellChargeEndVoltage) {
-                      modCommandsPrintf("Partial charging to default (%.2fV).", config->cellChargeEndVoltage);
+                    if (generalConfig->cellChargeEndVoltage) {
+                      modCommandsPrintf("Partial charging to default (%.2fV).", generalConfig->cellChargeEndVoltage);
                     } else {
                       modCommandsPrintf("Partial charging disabled.");
                     }

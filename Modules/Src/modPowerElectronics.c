@@ -1110,7 +1110,7 @@ void modPowerElectronicsClearChargeEndCellVoltage() {
 // requested (either via config or modPowerElectronicsSetChargeEndCellVoltage).
 // Otherwise returns the cell soft overvoltage to charge to 100%.
 float modPowerElectronicsGetEffectiveChargeEndCellVoltage() {
-  float voltage = chargeEndCellVoltage;
+  float voltage = modPowerElectronicsGeneralConfigHandle->cellChargeEndVoltage;
   if (voltage < modPowerElectronicsGeneralConfigHandle->cellLCSoftUnderVoltage) {
     // No temporary value set -- use the configured value:
     voltage = modPowerElectronicsGeneralConfigHandle->cellChargeEndVoltage;
