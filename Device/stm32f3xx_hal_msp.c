@@ -42,7 +42,7 @@ extern void Error_Handler(void);
 /**
   * Initializes the Global MSP.
   */
-void HAL_MspInit(void)
+__weak void HAL_MspInit(void)
 {
   /* USER CODE BEGIN MspInit 0 */
 

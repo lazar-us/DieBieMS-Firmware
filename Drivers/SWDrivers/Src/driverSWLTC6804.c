@@ -23,7 +23,7 @@ void driverSWLTC6804Init(driverLTC6804ConfigStructTypedef configStruct, uint8_t 
 	//uint8_t rxConfig [driverSWLTC6804TotalNumerOfICs][8];
 	uint8_t LTCScanCount = 0;
 	
-	driverHWSPI1Init(LTC6804_CS_GPIO_Port,LTC6804_CS_Pin);
+	driverHWSPI1Init(LTC_CS_GPIO_Port,LTC_CS_Pin);
 	driverSWLTC6804WakeIC();
 	
 	while((LTCScanCount < 5) && (returnPEC == -1)){
@@ -517,19 +517,19 @@ int8_t driverSWLTC6804ReadConfigRegister(uint8_t total_ic, uint8_t r_config[][8]
 
 // Coupling of drivers
 void driverSWLTC6804Write(uint8_t *writeBytes, uint8_t writeLength) {
-	driverHWSPI1Write(writeBytes,writeLength,LTC6804_CS_GPIO_Port,LTC6804_CS_Pin);
+	driverHWSPI1Write(writeBytes,writeLength,LTC_CS_GPIO_Port,LTC_CS_Pin);
 };
 
 // Coupling of drivers
 void driverSWLTC6804WriteRead(uint8_t *writeBytes, uint8_t writeLength, uint8_t *readBytes, uint8_t readLength) {
-	driverHWSPI1WriteRead(writeBytes,writeLength,readBytes,readLength,LTC6804_CS_GPIO_Port,LTC6804_CS_Pin);
+	driverHWSPI1WriteRead(writeBytes,writeLength,readBytes,readLength,LTC_CS_GPIO_Port,LTC_CS_Pin);
 };
 
 void driverSWLTC6804WakeIC(void){
 	driverSWLTC6804DelayMS(1);
-	HAL_GPIO_WritePin(LTC6804_CS_GPIO_Port,LTC6804_CS_Pin,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LTC_CS_GPIO_Port,LTC_CS_Pin,GPIO_PIN_RESET);
 	driverSWLTC6804DelayMS(1);
-	HAL_GPIO_WritePin(LTC6804_CS_GPIO_Port,LTC6804_CS_Pin,GPIO_PIN_SET);	
+	HAL_GPIO_WritePin(LTC_CS_GPIO_Port,LTC_CS_Pin,GPIO_PIN_SET);	
 	driverSWLTC6804DelayMS(1);
 }
 

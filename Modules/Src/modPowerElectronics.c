@@ -940,7 +940,7 @@ void modPowerElectronicsTerminalCellConnectionTest(int argc, const char **argv) 
 	if(argc == 3){
 		// Two arguments given, taking this as balance and error threshold.
 		sscanf(argv[1], "%f", &argErrorVoltage);
-		sscanf(argv[2], "%d", &argBalanceDropMiliVoltage);
+		sscanf(argv[2], "%ld", &argBalanceDropMiliVoltage);
 	}else{
 	  modCommandsPrintf("No valid test arguments given. Using defaults:");
 	}

@@ -200,7 +200,7 @@ void modTerminalProcessString(char *str) {
 		modCommandsPrintf("---Setting new cell count---");
 		if (argc == 2) {
 			uint32_t newNumberOfCells = 0;
-			sscanf(argv[1], "%u", &newNumberOfCells);
+			sscanf(argv[1], "%lu", &newNumberOfCells);
 			if(newNumberOfCells < 13 && newNumberOfCells > 2) {
 				modCommandsPrintf("Number of cells is set to: %u.",newNumberOfCells);
 				generalConfig->noOfCellsSeries = newNumberOfCells;
