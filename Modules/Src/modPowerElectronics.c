@@ -25,6 +25,9 @@ configCellMonitorICTypeEnum modPowerElectronicsCellMonitorsTypeActive;
 float    modPowerElectronicsChargeDiodeBypassHysteresis;
 bool     modPowerElectronicsVoltageSenseError;
 
+// Desired end voltage for the current charge cycle. Unset if zero.
+float    modPowerElectronicsChargeEndCellVoltage;
+
 bool     modPowerElectronicsChargeDeratingActive;
 uint32_t modPowerElectronicsChargeIncreaseLastTick;
 uint32_t chargeIncreaseIntervalTime;
@@ -239,13 +242,18 @@ bool modPowerElectronicsSetDisCharge(bool newState) {
 	static bool dischargeLastState = false;
 	
 	if(dischargeLastState != newState) {
-		if(newState)
-			driverHWSwitchesSetSwitchState(SWITCH_DRIVER,SWITCH_SET); 
+                if(newState) {
+			driverHWSwitchesSetSwitchState(SWITCH_DRIVER,SWITCH_SET);
+
+                        // Clear temporary partial charge state when discharge begins.
+                        modPowerElectronicsClearChargeEndCellVoltage();
+                }
 		
 		modPowerElectronicsPackStateHandle->disChargeDesired = newState;
 		modPowerElectronicsUpdateSwitches();
 		dischargeLastState = newState;
 	}
+
 	
 	if((modPowerElectronicsPackStateHandle->loCurrentLoadVoltage < PRECHARGE_PERCENTAGE*(modPowerElectronicsPackStateHandle->packVoltage)) && modPowerElectronicsGeneralConfigHandle->LCUsePrecharge) // Prevent turn on with to low output voltage
 		return false;																																			                                                  // Load voltage to low (output not precharged enough) return whether or not precharge is needed.
@@ -354,7 +362,8 @@ void modPowerElectronicsSubTaskVoltageWatch(void) {
 			modPowerElectronicsDisChargeHCRetryLastTick = HAL_GetTick();
 		}
 		
-		if(modPowerElectronicsPackStateHandle->cellVoltageHigh >= modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage) {
+                float chargeEndCellVoltage = modPowerElectronicsGetEffectiveChargeEndCellVoltage();
+		if(modPowerElectronicsPackStateHandle->cellVoltageHigh >= chargeEndCellVoltage) {
 			modPowerElectronicsPackStateHandle->chargeAllowed = false;
 			modPowerElectronicsChargeRetryLastTick = HAL_GetTick();
 		}
@@ -371,7 +380,7 @@ void modPowerElectronicsSubTaskVoltageWatch(void) {
 				modPowerElectronicsPackStateHandle->disChargeHCAllowed = true;
 		}		
 		
-		if(modPowerElectronicsPackStateHandle->cellVoltageHigh <= (modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage - modPowerElectronicsGeneralConfigHandle->hysteresisCharge)) {
+		if(modPowerElectronicsPackStateHandle->cellVoltageHigh <= (chargeEndCellVoltage - modPowerElectronicsGeneralConfigHandle->hysteresisCharge)) {
 			if(modDelayTick1ms(&modPowerElectronicsChargeRetryLastTick,modPowerElectronicsGeneralConfigHandle->timeoutChargeRetry))
 				modPowerElectronicsPackStateHandle->chargeAllowed = true;
 		}
@@ -526,8 +535,9 @@ void modPowerElectronicsCalcThrottle(void) {
 	uint16_t  chargeIncreaseRate;
 	float     cellSoftUnderVoltage = modPowerElectronicsGeneralConfigHandle->cellHCSoftUnderVoltage;
 	
-	float inputLowerLimitCharge = modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperMargin - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperStart;
-	float inputUpperLimitCharge = modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperMargin;
+        float chargeEndCellVoltage = modPowerElectronicsGetEffectiveChargeEndCellVoltage();
+	float inputLowerLimitCharge = chargeEndCellVoltage - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperMargin - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperStart;
+	float inputUpperLimitCharge = chargeEndCellVoltage - modPowerElectronicsGeneralConfigHandle->cellThrottleUpperMargin;
 	float outputLowerLimitCharge = 1000.0f;
 	float outputUpperLimitCharge = 100.0f;
 	
@@ -1081,7 +1091,38 @@ void modPowerElectronicsTerminalCellConnectionTest(int argc, const char **argv) 
 	modCommandsPrintf("------     Overall: %s       ------",overAllPassFail ? "Pass" : "Fail");// Tell whether test passed / failed
 }
 
+bool modPowerElectronicsSetChargeEndCellVoltage(float chargeEndCellVoltage) {
+  if (chargeEndCellVoltage > modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage) return false;
+  if (chargeEndCellVoltage < modPowerElectronicsGeneralConfigHandle->cellLCSoftUnderVoltage) return false;
+  modPowerElectronicsChargeEndCellVoltage = chargeEndCellVoltage;
+  return true;
+}
 
+// Clear the charge end voltage. Charge will end at the configured
+// cellChargeEndVoltage or cellSoftOverVoltage.
+void modPowerElectronicsClearChargeEndCellVoltage() {
+  modPowerElectronicsChargeEndCellVoltage = 0.0f;
+}
 
+// Returns the effective charge end voltage.
+//
+// Returns the provided partial charge voltage if a partial charge has been
+// requested (either via config or modPowerElectronicsSetChargeEndCellVoltage).
+// Otherwise returns the cell soft overvoltage to charge to 100%.
+float modPowerElectronicsGetEffectiveChargeEndCellVoltage() {
+  float voltage = chargeEndCellVoltage;
+  if (voltage < modPowerElectronicsGeneralConfigHandle->cellLCSoftUnderVoltage) {
+    // No temporary value set -- use the configured value:
+    voltage = modPowerElectronicsGeneralConfigHandle->cellChargeEndVoltage;
+  }
 
+  if (voltage < modPowerElectronicsGeneralConfigHandle->cellLCSoftUnderVoltage) {
+    // No value configured -- charge to 100%:
+    voltage = modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage;
+  } else if (voltage > modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage) {
+    // Value higher than soft over voltage -- lower it:
+    voltage = modPowerElectronicsGeneralConfigHandle->cellSoftOverVoltage;
+  }
 
+  return voltage;
+}

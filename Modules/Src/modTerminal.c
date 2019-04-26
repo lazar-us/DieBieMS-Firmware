@@ -106,12 +106,10 @@ void modTerminalProcessString(char *str) {
 		modCommandsPrintf("Cell voltage mismatch : %.3fV",packState.cellVoltageMisMatch);
 		modCommandsPrintf("Discharge enabled     : %s",disChargeEnabled ? "True" : "False");
 		modCommandsPrintf("Charge enabled        : %s",chargeEnabled ? "True" : "False");	
-    modCommandsPrintf("Power button pressed  : %s",packState.powerButtonActuated ? "True" : "False");	
-    modCommandsPrintf("CAN safety state      : %s",packState.safetyOverCANHCSafeNSafe	? "True" : "False");	
-		
+		modCommandsPrintf("Power button pressed  : %s",packState.powerButtonActuated ? "True" : "False");		
+		modCommandsPrintf("CAN safety state      : %s",packState.safetyOverCANHCSafeNSafe	? "True" : "False");	
 		modCommandsPrintf("---End Battery Pack Status---");
 		modCommandsPrintf(" ");
-		
 	} else if (strcmp(argv[0], "sens") == 0) {		
 		modCommandsPrintf("-----       Sensors         -----");
 		
@@ -166,6 +164,7 @@ void modTerminalProcessString(char *str) {
 		modCommandsPrintf("cellHardOverVoltage        : %.3fV",generalConfig->cellHardOverVoltage);
 		modCommandsPrintf("cellLCSoftUnderVoltage     : %.3fV",generalConfig->cellLCSoftUnderVoltage);
 		modCommandsPrintf("cellSoftOverVoltage        : %.3fV",generalConfig->cellSoftOverVoltage);
+		modCommandsPrintf("cellChargeEndVoltage       : %.3fV",generalConfig->cellChargeEndVoltage);
 		modCommandsPrintf("cellBalanceStart           : %.3fV",generalConfig->cellBalanceStart);
 		modCommandsPrintf("cellBalanceDiffThreshold   : %.3fV",generalConfig->cellBalanceDifferenceThreshold);
 		modCommandsPrintf("CAN ID                     : %u",generalConfig->CANID);
@@ -283,6 +282,12 @@ void modTerminalProcessString(char *str) {
 		modCommandsPrintf("  Read BMS configuration from EEPROM.");
 		modCommandsPrintf("hwinfo");
 		modCommandsPrintf("  Print some hardware information.");
+		modCommandsPrintf("partial_charge");
+		modCommandsPrintf("  Set temporary partial charge: partial_charge set 4.15");
+		modCommandsPrintf("  Cancel partial charge, charge to default: partial_charge default");
+		modCommandsPrintf("  Disable partial charge, charge to full: partial_charge off");
+		modCommandsPrintf(" ");
+		modCommandsPrintf("---More functionallity to come...--");
 
 		for (int i = 0;i < callback_write;i++) {
 			if (callbacks[i].arg_names) {
@@ -299,9 +304,46 @@ void modTerminalProcessString(char *str) {
 		}
 
 		modCommandsPrintf(" ");
-	} else {
-		bool found = false;
-		for (int i = 0;i < callback_write;i++) {
+	} else if (strcmp(argv[0], "partial_charge") == 0) {
+		modCommandsPrintf("---Setting partial charge limit---");
+		if (argc == 1) {
+			modCommandsPrintf("This command requires one argument.");
+		} else if (strcmp(argv[1], "off") == 0) {
+                  if (argc != 2) {
+                    modCommandsPrintf("This command requires two arguments.");
+                  } else if (!modPowerElectronicsSetChargeEndCellVoltage(config->cellSoftOverVoltage)) {
+                    modCommandsPrintf("Failed to disable partial charging.");
+                  } else {
+                    modCommandsPrintf("Partial charging disabled.");
+                  }
+                } else if (strcmp(argv[1], "default") == 0) {
+                  if (argc != 2) {
+                    modCommandsPrintf("This command requires two arguments.");
+                  } else {
+                    modPowerElectronicsClearChargeEndCellVoltage();
+                    if (config->cellChargeEndVoltage) {
+                      modCommandsPrintf("Partial charging to default (%.2fV).", config->cellChargeEndVoltage);
+                    } else {
+                      modCommandsPrintf("Partial charging disabled.");
+                    }
+                  }
+                } else if (strcmp(argv[1], "set") == 0) {
+                  if (argc != 3) {
+                    modCommandsPrintf("This command requires three arguments.");
+                  } else {
+                    float newChargeEndLimit = 0;
+                    sscanf(argv[2], "%f", &newChargeEndLimit);
+                    if (modPowerElectronicsSetChargeEndCellVoltage(newChargeEndLimit)) {
+                      modCommandsPrintf("Set charge end voltage to %.2fV.", newChargeEndLimit);
+                    } else {
+                      modCommandsPrintf("Invalid charge end voltage.");
+                    }
+                  }
+                }
+                modCommandsPrintf(" ");
+        } else {
+                bool found = false;
+                for (int i = 0;i < callback_write;i++) {
 			if (strcmp(argv[0], callbacks[i].command) == 0) {
 				callbacks[i].cbf(argc, (const char**)argv);
 				found = true;

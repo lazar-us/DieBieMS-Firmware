@@ -127,6 +127,30 @@ void modCommandsProcessPacket(unsigned char *data, unsigned int len) {
 			modCommandsSendBuffer[ind++] = modCommandsGeneralConfig->CANID;
 			modCommandsSendPacket(modCommandsSendBuffer, ind);
 			break;
+          case COMM_SET_CHARGE_END_CELL_VOLTAGE: {
+			ind = 0;
+                        bool ok = modPowerElectronicsSetChargeEndCellVoltage(libBufferGet_float32_auto(data,&ind));
+                        ind = 0;
+			modCommandsSendBuffer[ind++] = COMM_SET_CHARGE_END_CELL_VOLTAGE;
+                        libBufferAppend_uint8(modCommandsSendBuffer, ok, &ind);
+			modCommandsSendBuffer[ind++] = modCommandsGeneralConfig->CANID;
+			modCommandsSendPacket(modCommandsSendBuffer, ind);
+			break;
+          }
+          case COMM_GET_CHARGE_END_CELL_VOLTAGE:
+			ind = 0;
+			modCommandsSendBuffer[ind++] = COMM_GET_CHARGE_END_CELL_VOLTAGE;
+                        libBufferAppend_float32_auto(modCommandsSendBuffer, modPowerElectronicsGetEffectiveChargeEndCellVoltage(), &ind);
+			modCommandsSendBuffer[ind++] = modCommandsGeneralConfig->CANID;
+			modCommandsSendPacket(modCommandsSendBuffer, ind);
+			break;
+          case COMM_CLEAR_CHARGE_END_CELL_VOLTAGE:
+                        modPowerElectronicsClearChargeEndCellVoltage();
+			ind = 0;
+			modCommandsSendBuffer[ind++] = COMM_CLEAR_CHARGE_END_CELL_VOLTAGE;
+			modCommandsSendBuffer[ind++] = modCommandsGeneralConfig->CANID;
+			modCommandsSendPacket(modCommandsSendBuffer, ind);
+			break;
 		case COMM_SET_MCCONF:
 			ind = 0;
 		  modCommandsGeneralConfig->noOfCellsSeries                = libBufferGet_uint8(data,&ind);                  // 1

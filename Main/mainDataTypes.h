@@ -468,8 +468,21 @@ typedef enum {
 	COMM_SET_CHUCK_DATA,
 	COMM_CUSTOM_APP_DATA,
 	COMM_NRF_START_PAIRING,
-  COMM_STORE_BMS_CONF = 50,
-  COMM_GET_BMS_CELLS
+        COMM_STORE_BMS_CONF = 50,
+        COMM_GET_BMS_CELLS = 51,
+        // Set the charge end cell voltage. May be used to configure partial
+        // charging. A one byte packet is sent in response, containing 1 on
+        // success or 0 if the voltage was rejected.
+        COMM_SET_CHARGE_END_CELL_VOLTAGE = 53,
+        // Get the effective charge end cell voltage. This may be the value
+        // previously set, the configured default charge end voltage, or the
+        // configured soft over voltage. A packet containing an auto float is
+        // sent in response.
+        COMM_GET_CHARGE_END_CELL_VOLTAGE = 52,
+        // Clear a previously set charge end voltage. The default charge end
+        // voltage will be used if one has been configured. An empty packet is
+        // sent in response.
+        COMM_CLEAR_CHARGE_END_CELL_VOLTAGE = 54,
 } COMM_PACKET_ID;
 
 typedef enum {
@@ -478,18 +491,18 @@ typedef enum {
 } CAN_ID_STYLE;
 
 typedef enum {
-	OP_STATE_INIT = 0,											// 0
-	OP_STATE_CHARGING,											// 1
-	OP_STATE_PRE_CHARGE,										// 2
-	OP_STATE_LOAD_ENABLED,									// 3
-	OP_STATE_BATTERY_DEAD,									// 4
-	OP_STATE_POWER_DOWN,										// 5
-	OP_STATE_EXTERNAL,											// 6
-	OP_STATE_ERROR,													// 7
-	OP_STATE_ERROR_PRECHARGE,								// 8
-	OP_STATE_BALANCING,											// 9
-	OP_STATE_CHARGED,												// 10
-	OP_STATE_FORCEON,												// 11
+	OP_STATE_INIT = 0,
+	OP_STATE_CHARGING = 1,
+	OP_STATE_PRE_CHARGE = 2,
+	OP_STATE_LOAD_ENABLED = 3,
+	OP_STATE_BATTERY_DEAD = 4,
+	OP_STATE_POWER_DOWN = 5,
+	OP_STATE_EXTERNAL = 6,
+	OP_STATE_ERROR = 7,
+	OP_STATE_ERROR_PRECHARGE = 8,
+	OP_STATE_BALANCING = 9,
+	OP_STATE_CHARGED = 10,
+	OP_STATE_FORCEON = 11,
 } OperationalStateTypedef;
 
 typedef enum {
@@ -502,30 +515,30 @@ typedef enum {
 // CAN commands
 typedef enum {
 	CAN_PACKET_ESC_SET_DUTY = 0,
-	CAN_PACKET_ESC_SET_CURRENT,
-	CAN_PACKET_ESC_SET_CURRENT_BRAKE,
-	CAN_PACKET_ESC_SET_RPM,
-	CAN_PACKET_ESC_SET_POS,
-	CAN_PACKET_FILL_RX_BUFFER,
-	CAN_PACKET_FILL_RX_BUFFER_LONG,
-	CAN_PACKET_PROCESS_RX_BUFFER,
-	CAN_PACKET_PROCESS_SHORT_BUFFER,
-	CAN_PACKET_ESC_STATUS,
-	CAN_PACKET_ESC_SET_CURRENT_REL,
-	CAN_PACKET_ESC_SET_CURRENT_BRAKE_REL,
+	CAN_PACKET_ESC_SET_CURRENT = 1,
+	CAN_PACKET_ESC_SET_CURRENT_BRAKE = 2,
+	CAN_PACKET_ESC_SET_RPM = 3,
+	CAN_PACKET_ESC_SET_POS = 4,
+	CAN_PACKET_FILL_RX_BUFFER = 5,
+	CAN_PACKET_FILL_RX_BUFFER_LONG = 6,
+	CAN_PACKET_PROCESS_RX_BUFFER = 7,
+	CAN_PACKET_PROCESS_SHORT_BUFFER = 8,
+	CAN_PACKET_ESC_STATUS = 9,
+	CAN_PACKET_ESC_SET_CURRENT_REL = 10,
+	CAN_PACKET_ESC_SET_CURRENT_BRAKE_REL = 11,
 	CAN_PACKET_BMS_STATUS_MAIN_IV = 30,
-	CAN_PACKET_BMS_STATUS_CELLVOLTAGE,
-	CAN_PACKET_BMS_STATUS_THROTTLE_CH_DISCH_BOOL,
-	CAN_PACKET_BMS_STATUS_TEMPERATURES,
-	CAN_PACKET_BMS_STATUS_AUX_IV_SAFETY_WATCHDOG,
-	CAN_PACKET_BMS_KEEP_ALIVE_SAFETY,
-	CAN_PACKET_BMS_STATUS_WATER_HCLOAD,	
-	CAN_PACKET_BMS_STATUS_TEMP_INDIVIDUAL,
+	CAN_PACKET_BMS_STATUS_CELLVOLTAGE = 31,
+	CAN_PACKET_BMS_STATUS_THROTTLE_CH_DISCH_BOOL = 32,
+	CAN_PACKET_BMS_STATUS_TEMPERATURES = 33,
+	CAN_PACKET_BMS_STATUS_AUX_IV_SAFETY_WATCHDOG = 34,
+	CAN_PACKET_BMS_KEEP_ALIVE_SAFETY = 35,
+	CAN_PACKET_BMS_STATUS_WATER_HCLOAD = 36,
+	CAN_PACKET_BMS_STATUS_TEMP_INDIVIDUAL = 37,
 	CAN_PACKET_SLS_STATUS_CURRENT_RPM = 40,
-	CAN_PACKET_SLS_STATUS_TEMPERATURE,
+	CAN_PACKET_SLS_STATUS_TEMPERATURE = 41,
 	CAN_PACKET_SSR_STATUS_MAIN_V_TEMP = 60,
-	CAN_PACKET_SSR_STATUS_MAIN_LOAD0,
-	CAN_PACKET_SSR_STATUS_MAIN_LOAD1	
+	CAN_PACKET_SSR_STATUS_MAIN_LOAD0 = 61,
+	CAN_PACKET_SSR_STATUS_MAIN_LOAD1 = 62
 } CAN_PACKET_ID;
 
 typedef struct {
@@ -597,7 +610,7 @@ typedef enum {
   buzzerSourceWater,
   buzzerSourceHC,
   buzzerSourceLC,
-  buzzerSourceSOA	
+  buzzerSourceSOA
 } buzzerSignalSourceEnum;
 
 typedef enum {
@@ -608,7 +621,7 @@ typedef enum {
   buzzerSignalTypePulseShort,
   buzzerSignalTypePulseLong,
   buzzerSignalTypePulse200_20,
-  buzzerSignalTypePulse1000_4	
+  buzzerSignalTypePulse1000_4
 } buzzerSignalType;
 
 typedef struct {
